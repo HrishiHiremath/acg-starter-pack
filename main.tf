@@ -70,4 +70,49 @@ resource "aws_security_group" "web_sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 }
+
+
+
+resource "aws_internet_gateway" "acg-igw" {
+
+  vpc_id = aws_vpc.acg_vpc.id
+
+  tags = {
+    "Name" = "acg igw"
+  }
+  
+}
+
+# resource "aws_internet_gateway_attachment" "acg-igw-attachment" {
+  
+#   internet_gateway_id = aws_internet_gateway.acg-igw.id
+#   vpc_id = aws_vpc.acg_vpc.id
+
+# }
+
+resource "aws_lb" "hrishi-acg-nlb" {
+
+  name = "hrishi-acg-nlb"
+  internal = false
+  load_balancer_type = "network"
+  subnets = [ aws_subnet.acg_subnet_public.id ]
+  
+}
+
+resource "aws_lb_target_group" "hrishi-lb-aws_lb_target_group" {
+  
+  name = "hrishi-lb-target-group"
+  port = 80
+  protocol = "HTTP"
+  vpc_id = aws_vpc.acg_vpc.id
+}
+
+resource "aws_lb_target_group_attachment" "acg-target-group-attachment" {
+  
+  target_group_arn = aws_lb_target_group.hrishi-lb-aws_lb_target_group.arn
+  target_id = aws_instance.web-server.id
+  port = 80
+}
+
+
     
